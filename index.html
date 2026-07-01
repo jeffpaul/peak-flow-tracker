@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Peak Flow Tracker</title>
+  <meta name="description" content="A de-identified peak flow reading tracker and trend dashboard." />
+  <link rel="stylesheet" href="assets/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <h1>Peak Flow Tracker</h1>
+      <p>Trends from logged peak flow meter readings.</p>
+    </header>
+
+    <main>
+      <section class="card" aria-label="Summary statistics">
+        <div id="stats-grid" class="stats-grid"></div>
+      </section>
+
+      <section class="card" aria-label="Peak flow chart">
+        <div class="chart-card">
+          <canvas id="peak-flow-chart"></canvas>
+        </div>
+        <div class="legend">
+          <span><span class="swatch green"></span> Green zone</span>
+          <span><span class="swatch yellow"></span> Yellow zone</span>
+          <span><span class="swatch red"></span> Red zone</span>
+          <span><span class="swatch rescue"></span> After rescue inhaler</span>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Reading history">
+        <div class="table-controls">
+          <select id="zone-filter" aria-label="Filter by zone">
+            <option value="all">All zones</option>
+            <option value="green">Green</option>
+            <option value="yellow">Yellow</option>
+            <option value="red">Red</option>
+          </select>
+          <input id="text-filter" type="text" placeholder="Search date, time, or notes…" aria-label="Search readings" />
+        </div>
+        <div class="table-scroll">
+          <table class="history">
+            <thead>
+              <tr>
+                <th data-key="date">Date</th>
+                <th data-key="time">Time</th>
+                <th>Readings</th>
+                <th data-key="best">Best</th>
+                <th data-key="zone">Zone</th>
+                <th data-key="afterRescueBest">After rescue</th>
+                <th>Symptoms</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody id="history-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Data lives in <code>data/readings.json</code>, entered via a GitHub Issue Form. This dashboard is read-only.</p>
+    </footer>
+  </div>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

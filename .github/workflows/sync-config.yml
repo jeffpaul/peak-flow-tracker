@@ -1,0 +1,44 @@
+name: Sync Config
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GREEN_MIN: ${{ vars.GREEN_MIN }}
+      GREEN_MAX: ${{ vars.GREEN_MAX }}
+      YELLOW_MIN: ${{ vars.YELLOW_MIN }}
+      YELLOW_MAX: ${{ vars.YELLOW_MAX }}
+      RED_MAX: ${{ vars.RED_MAX }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Write data/config.json from repo Variables
+        run: |
+          cat > data/config.json <<EOF
+          {
+            "zones": {
+              "green": { "min": ${GREEN_MIN:-240}, "max": ${GREEN_MAX:-300} },
+              "yellow": { "min": ${YELLOW_MIN:-150}, "max": ${YELLOW_MAX:-240} },
+              "red": { "max": ${RED_MAX:-150} }
+            }
+          }
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data/config.json; then
+            echo "No changes to data/config.json"
+            exit 0
+          fi
+          git add data/config.json
+          git commit -m "Sync data/config.json from repo Variables"
+          git push

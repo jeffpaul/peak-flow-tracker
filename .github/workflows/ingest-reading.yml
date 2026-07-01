@@ -1,0 +1,230 @@
+name: Ingest Reading
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: write
+
+jobs:
+  ingest:
+    if: contains(github.event.issue.labels.*.name, 'reading')
+    runs-on: ubuntu-latest
+    env:
+      ALLOWED_USERS: ${{ vars.ALLOWED_USERS }}
+      GREEN_MIN: ${{ vars.GREEN_MIN }}
+      GREEN_MAX: ${{ vars.GREEN_MAX }}
+      YELLOW_MIN: ${{ vars.YELLOW_MIN }}
+      YELLOW_MAX: ${{ vars.YELLOW_MAX }}
+      RED_MAX: ${{ vars.RED_MAX }}
+    steps:
+      - name: Check authorization
+        id: auth
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const allowed = (process.env.ALLOWED_USERS || 'jeffpaul')
+              .split(',')
+              .map((s) => s.trim().toLowerCase())
+              .filter(Boolean);
+            const author = context.payload.issue.user.login.toLowerCase();
+            const authorized = allowed.includes(author);
+            core.setOutput('authorized', String(authorized));
+
+            if (!authorized) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: 'This repo only accepts readings from authorized submitters. Closing this issue.',
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: 'closed',
+              });
+            }
+
+      - name: Checkout
+        if: steps.auth.outputs.authorized == 'true'
+        uses: actions/checkout@v4
+
+      - name: Parse reading and append entry
+        if: steps.auth.outputs.authorized == 'true'
+        id: process
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const body = context.payload.issue.body || '';
+
+            function extractField(label) {
+              const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const re = new RegExp(`### ${escaped}\\s*\\n\\n([\\s\\S]*?)(?=\\n### |$)`, 'i');
+              const m = body.match(re);
+              if (!m) return '';
+              const value = m[1].trim();
+              return value === '_No response_' ? '' : value;
+            }
+
+            function toNumber(raw) {
+              if (raw === '' || raw === null || raw === undefined) return null;
+              const n = Number(raw);
+              return Number.isFinite(n) ? n : null;
+            }
+
+            function symptomChecked(block, name) {
+              const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              const re = new RegExp(`-\\s*\\[(x|X)\\]\\s*${escaped}`);
+              return re.test(block);
+            }
+
+            function to24Hour(time, period) {
+              const match = time.match(/^(\d{1,2}):(\d{2})/);
+              if (!match) return { hh: '00', mm: '00' };
+              let h = Number(match[1]);
+              const m = match[2];
+              if (period === 'PM' && h !== 12) h += 12;
+              if (period === 'AM' && h === 12) h = 0;
+              return { hh: String(h).padStart(2, '0'), mm: m };
+            }
+
+            const date = extractField('Date');
+            const time = extractField('Time');
+            const period = extractField('AM / PM');
+            const reading1 = toNumber(extractField('Reading 1 (L/min)'));
+            const reading2 = toNumber(extractField('Reading 2 (L/min)'));
+            const reading3 = toNumber(extractField('Reading 3 (L/min)'));
+            const beforeRescue = extractField('Taken before rescue inhaler?') === 'Yes';
+            const afterRescue = extractField('Taken after rescue inhaler?') === 'Yes';
+            const afterReading1 = toNumber(extractField('After-rescue reading 1 (L/min) — optional'));
+            const afterReading2 = toNumber(extractField('After-rescue reading 2 (L/min) — optional'));
+            const afterReading3 = toNumber(extractField('After-rescue reading 3 (L/min) — optional'));
+            const symptomsBlock = extractField('Symptoms');
+            const notes = extractField('Notes');
+
+            const readings = [reading1, reading2, reading3].filter((n) => n !== null);
+            const best = readings.length ? Math.max(...readings) : null;
+
+            const afterReadings = [afterReading1, afterReading2, afterReading3].filter((n) => n !== null);
+            const afterRescueBest = afterReadings.length ? Math.max(...afterReadings) : null;
+
+            if (best === null) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: "Couldn't read any valid readings from this issue. Please open a new one using the Log a reading template.",
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: 'closed',
+              });
+              core.setOutput('appended', 'false');
+              return;
+            }
+
+            const GREEN_MIN = Number(process.env.GREEN_MIN || 240);
+            const YELLOW_MIN = Number(process.env.YELLOW_MIN || 150);
+
+            function zoneFor(value) {
+              if (value >= GREEN_MIN) return 'green';
+              if (value >= YELLOW_MIN) return 'yellow';
+              return 'red';
+            }
+
+            const zone = zoneFor(best);
+
+            let rescueImprovement = null;
+            if (beforeRescue && afterRescue && afterRescueBest !== null && best > 0) {
+              const pctIncrease = (afterRescueBest - best) / best;
+              if (pctIncrease >= 0.2) {
+                rescueImprovement = Math.round(pctIncrease * 100);
+              }
+            }
+
+            const { hh, mm } = to24Hour(time, period);
+            const id = `${date}T${hh}:${mm}:00Z`;
+
+            const entry = {
+              id,
+              date,
+              time,
+              period,
+              readings,
+              best,
+              beforeRescue,
+              afterRescue,
+              afterRescueBest,
+              symptoms: {
+                cough: symptomChecked(symptomsBlock, 'Cough'),
+                wheeze: symptomChecked(symptomsBlock, 'Wheeze'),
+                nighttimeAwakening: symptomChecked(symptomsBlock, 'Nighttime awakening'),
+                notes,
+              },
+            };
+
+            const dataPath = path.join(process.env.GITHUB_WORKSPACE, 'data', 'readings.json');
+            const existing = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+            existing.push(entry);
+            existing.sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+            fs.writeFileSync(dataPath, JSON.stringify(existing, null, 2) + '\n');
+
+            core.setOutput('appended', 'true');
+            core.setOutput('best', String(best));
+            core.setOutput('zone', zone);
+            core.setOutput('rescueImprovement', rescueImprovement === null ? '' : String(rescueImprovement));
+
+      - name: Commit and push
+        if: steps.auth.outputs.authorized == 'true' && steps.process.outputs.appended == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/readings.json
+          git commit -m "Log reading: issue #${{ github.event.issue.number }}"
+          git push
+
+      - name: Comment and close
+        if: steps.auth.outputs.authorized == 'true' && steps.process.outputs.appended == 'true'
+        uses: actions/github-script@v7
+        env:
+          BEST: ${{ steps.process.outputs.best }}
+          ZONE: ${{ steps.process.outputs.zone }}
+          RESCUE_IMPROVEMENT: ${{ steps.process.outputs.rescueImprovement }}
+        with:
+          script: |
+            const best = process.env.BEST;
+            const zone = process.env.ZONE;
+            const rescueImprovement = process.env.RESCUE_IMPROVEMENT;
+
+            const zoneCopy = {
+              green: `Logged: ${best} L/min — Green zone ✅`,
+              yellow: `⚠️ ${best} L/min — Yellow zone, watch closely. If this persists, consider rescue medication and a call to the doctor.`,
+              red: `🚨 ${best} L/min — Red zone. Use rescue inhaler immediately and contact your doctor or ER.`,
+            };
+
+            let body = zoneCopy[zone] || `Logged: ${best} L/min`;
+
+            if (rescueImprovement) {
+              body += `\n\nPEF improved ${rescueImprovement}% after rescue inhaler use (≥20%) — per the action plan, this may mean it's time to talk to your doctor about adjusting controller medication.`;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              state: 'closed',
+            });

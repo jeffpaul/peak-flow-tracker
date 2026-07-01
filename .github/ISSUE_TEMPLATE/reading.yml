@@ -1,0 +1,110 @@
+name: Log a reading
+description: Record a peak flow meter reading
+title: "Reading"
+labels: ["reading"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill in today's readings. Three readings are expected per session — the highest of the three is recorded as your best.
+  - type: input
+    id: date
+    attributes:
+      label: Date
+      description: Format YYYY-MM-DD
+      placeholder: "YYYY-MM-DD (e.g. 2026-07-01)"
+    validations:
+      required: true
+  - type: input
+    id: time
+    attributes:
+      label: Time
+      description: Format HH:MM (24-hour or 12-hour, paired with the AM/PM field below)
+      placeholder: "07:15"
+    validations:
+      required: true
+  - type: dropdown
+    id: period
+    attributes:
+      label: AM / PM
+      options:
+        - AM
+        - PM
+    validations:
+      required: true
+  - type: input
+    id: reading1
+    attributes:
+      label: Reading 1 (L/min)
+      placeholder: "280"
+    validations:
+      required: true
+  - type: input
+    id: reading2
+    attributes:
+      label: Reading 2 (L/min)
+      placeholder: "275"
+    validations:
+      required: true
+  - type: input
+    id: reading3
+    attributes:
+      label: Reading 3 (L/min)
+      placeholder: "290"
+    validations:
+      required: true
+  - type: dropdown
+    id: beforeRescue
+    attributes:
+      label: Taken before rescue inhaler?
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: true
+  - type: dropdown
+    id: afterRescue
+    attributes:
+      label: Taken after rescue inhaler?
+      options:
+        - "No"
+        - "Yes"
+    validations:
+      required: true
+  - type: input
+    id: afterReading1
+    attributes:
+      label: After-rescue reading 1 (L/min) — optional
+      description: Only fill in if "After rescue inhaler?" above is Yes
+      placeholder: "310"
+    validations:
+      required: false
+  - type: input
+    id: afterReading2
+    attributes:
+      label: After-rescue reading 2 (L/min) — optional
+      placeholder: "305"
+    validations:
+      required: false
+  - type: input
+    id: afterReading3
+    attributes:
+      label: After-rescue reading 3 (L/min) — optional
+      placeholder: "315"
+    validations:
+      required: false
+  - type: checkboxes
+    id: symptoms
+    attributes:
+      label: Symptoms
+      options:
+        - label: Cough
+        - label: Wheeze
+        - label: Nighttime awakening
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Anything else worth recording (activity, triggers, medication changes, etc.)
+    validations:
+      required: false

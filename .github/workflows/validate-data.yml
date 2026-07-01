@@ -1,0 +1,83 @@
+name: Validate Data
+
+on:
+  push:
+    paths:
+      - "data/readings.json"
+      - "data/config.json"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate data/readings.json shape
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const readingsPath = path.join(process.env.GITHUB_WORKSPACE, 'data', 'readings.json');
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, 'data', 'config.json');
+
+            function fail(message) {
+              core.setFailed(message);
+            }
+
+            let readings;
+            try {
+              readings = JSON.parse(fs.readFileSync(readingsPath, 'utf8'));
+            } catch (e) {
+              return fail(`data/readings.json is not valid JSON: ${e.message}`);
+            }
+
+            if (!Array.isArray(readings)) {
+              return fail('data/readings.json must be a JSON array');
+            }
+
+            const requiredStringFields = ['id', 'date', 'time', 'period'];
+            const requiredBoolFields = ['beforeRescue', 'afterRescue'];
+
+            readings.forEach((entry, i) => {
+              for (const field of requiredStringFields) {
+                if (typeof entry[field] !== 'string' || entry[field].length === 0) {
+                  fail(`Entry ${i} (${entry.id || 'unknown'}) is missing string field "${field}"`);
+                }
+              }
+              if (!Array.isArray(entry.readings) || entry.readings.some((n) => typeof n !== 'number')) {
+                fail(`Entry ${i} (${entry.id || 'unknown'}) must have a "readings" array of numbers`);
+              }
+              if (typeof entry.best !== 'number') {
+                fail(`Entry ${i} (${entry.id || 'unknown'}) is missing numeric field "best"`);
+              }
+              for (const field of requiredBoolFields) {
+                if (typeof entry[field] !== 'boolean') {
+                  fail(`Entry ${i} (${entry.id || 'unknown'}) is missing boolean field "${field}"`);
+                }
+              }
+              if (entry.afterRescueBest !== null && typeof entry.afterRescueBest !== 'number') {
+                fail(`Entry ${i} (${entry.id || 'unknown'}) "afterRescueBest" must be a number or null`);
+              }
+              if (!entry.symptoms || typeof entry.symptoms !== 'object') {
+                fail(`Entry ${i} (${entry.id || 'unknown'}) is missing "symptoms" object`);
+              }
+            });
+
+            if (fs.existsSync(configPath)) {
+              let config;
+              try {
+                config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+              } catch (e) {
+                return fail(`data/config.json is not valid JSON: ${e.message}`);
+              }
+              const zones = config.zones || {};
+              if (typeof zones.green?.min !== 'number' || typeof zones.yellow?.min !== 'number' || typeof zones.red?.max !== 'number') {
+                fail('data/config.json "zones" is missing required numeric thresholds');
+              }
+            }
+
+            if (!core.summary) return;
+            console.log(`Validated ${readings.length} reading entries.`);

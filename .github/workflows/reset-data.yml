@@ -1,0 +1,29 @@
+name: Reset Data
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wipe data/readings.json
+        run: echo "[]" > data/readings.json
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- data/readings.json; then
+            echo "data/readings.json already empty"
+            exit 0
+          fi
+          git add data/readings.json
+          git commit -m "Reset data/readings.json to empty array"
+          git push
