@@ -46,9 +46,7 @@ Only usernames listed in `ALLOWED_USERS` can submit; anyone else gets a comment 
 
 ## Resetting to real data
 
-The seed data in `data/readings.json` is there so you can see the dashboard working before you've logged anything real. When you're ready:
-
-**Actions tab → Reset Data → Run workflow.** This overwrites `data/readings.json` with `[]` and commits, giving you a clean boundary in the repo history between test data and real data.
+The seed data in `data/readings.json` is there so you can see the dashboard working before you've logged anything real. There's intentionally no automated "reset" workflow for this — ask Claude Code to wipe `data/readings.json` back to `[]` and commit when you're ready to stop looking at sample data, so it doesn't happen by accident once real data is in there.
 
 ## Repo structure
 
@@ -67,7 +65,6 @@ peak-flow-tracker/
 │   └── workflows/
 │       ├── ingest-reading.yml       # checks allowed user → parses reading → appends to readings.json
 │       ├── sync-config.yml          # writes data/config.json from repo Variables (manual trigger)
-│       ├── reset-data.yml           # wipes data/readings.json to [] (manual trigger)
 │       └── validate-data.yml        # lints readings.json/config.json shape on push
 └── peak-flow-tracker-spec.md        # original build spec
 ```
