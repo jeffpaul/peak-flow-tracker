@@ -25,17 +25,17 @@ Go to **Settings → Secrets and variables → Actions → Variables tab** and s
 | `YELLOW_MAX` | `240` | Upper bound of yellow zone |
 | `RED_MAX` | `150` | Anything below this is red zone |
 
-These are just plain L/min cutoffs — no code changes needed if a doctor gives you different numbers later, just update the variables and re-run `Sync Config` (below).
+These variables drive the `Ingest Reading` workflow's zone classification for new readings (it reads `vars` directly). They're **not** read by the dashboard — GitHub Pages serves static files and can't query repo Variables at runtime, so the dashboard reads the plain thresholds out of `data/config.json` instead.
+
+That means the two are two separate copies of the same numbers, and nothing keeps them in sync automatically. If a doctor visit changes the thresholds:
+1. Update the Variables above (affects newly-logged readings going forward).
+2. Also hand-edit `data/config.json` to match (affects the dashboard's zone bands/stats going forward) — ask Claude Code to do this and commit if you'd rather not edit JSON directly.
+
+Historical entries in `data/readings.json` already have their zone baked in at ingest time and won't be reclassified retroactively either way.
 
 ### 2. Enable GitHub Pages
 
 **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main`, folder `/ (root)`.
-
-### 3. Run "Sync Config" once
-
-**Actions tab → Sync Config → Run workflow.** This writes the Variables above into `data/config.json`, which is what the static dashboard actually reads (Pages can't read repo Variables directly).
-
-Re-run this any time you change the threshold Variables.
 
 ## Logging a reading on your phone
 
@@ -58,13 +58,12 @@ peak-flow-tracker/
 │   └── style.css
 ├── data/
 │   ├── readings.json                # array of reading entries
-│   └── config.json                  # generated from repo Variables — do not hand-edit
+│   └── config.json                  # zone thresholds for the dashboard — hand-edited, keep in sync with repo Variables
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
 │   │   └── reading.yml              # structured issue form for logging a reading
 │   └── workflows/
 │       ├── ingest-reading.yml       # checks allowed user → parses reading → appends to readings.json
-│       ├── sync-config.yml          # writes data/config.json from repo Variables (manual trigger)
 │       └── validate-data.yml        # lints readings.json/config.json shape on push
 └── peak-flow-tracker-spec.md        # original build spec
 ```
