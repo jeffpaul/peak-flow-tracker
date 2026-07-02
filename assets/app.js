@@ -83,7 +83,7 @@
     const current = pct(last30);
     const previous = pct(prev30);
 
-    let trend = "—";
+    let trend = null;
     if (current !== null && previous !== null) {
       if (current > previous) trend = "▲ up vs prior 30 days";
       else if (current < previous) trend = "▼ down vs prior 30 days";
