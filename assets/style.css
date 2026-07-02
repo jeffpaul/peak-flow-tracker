@@ -254,6 +254,11 @@ footer.site-footer {
   padding: 1.5rem 1rem 2rem;
 }
 
+footer.site-footer a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
 .form-card {
   display: flex;
   flex-direction: column;
