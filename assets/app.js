@@ -19,6 +19,8 @@
     return "red";
   }
 
+  const ZONE_RANK = { green: 0, yellow: 1, red: 2 };
+
   async function loadData() {
     const [readingsRes, configRes] = await Promise.all([
       fetch("data/readings.json", { cache: "no-store" }),
@@ -302,8 +304,8 @@
       let av = a[key];
       let bv = b[key];
       if (key === "zone") {
-        av = zoneFor(a.best, state.config.zones);
-        bv = zoneFor(b.best, state.config.zones);
+        av = ZONE_RANK[zoneFor(a.best, state.config.zones)];
+        bv = ZONE_RANK[zoneFor(b.best, state.config.zones)];
       }
       if (av === bv) return 0;
       return av > bv ? dir : -dir;
@@ -329,7 +331,7 @@
 
     if (!totalItems) {
       const emptyRow = document.createElement("tr");
-      emptyRow.innerHTML = `<td colspan="8" class="empty-state">No readings match the current filter.</td>`;
+      emptyRow.innerHTML = `<td colspan="7" class="empty-state">No readings match the current filter.</td>`;
       tbody.appendChild(emptyRow);
       renderPagination(totalItems, totalPages);
       return;
@@ -347,12 +349,11 @@
 
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${e.date}</td>
-        <td>${e.time} ${e.period}</td>
+        <td>${e.date} ${e.time} ${e.period}</td>
         <td>${e.readings.join(" / ")}</td>
         <td><strong>${e.best}</strong></td>
         <td><span class="zone-pill ${zone}">${zone}</span></td>
-        <td>${e.afterRescue ? `<span class="rescue-badge">▲ Yes</span>` : "—"}</td>
+        <td>${e.afterRescue ? `<span class="rescue-badge">▲ Yes</span>` : "No"}</td>
         <td>${symptomList || "—"}</td>
         <td class="notes-cell">${e.symptoms && e.symptoms.notes ? e.symptoms.notes : "—"}</td>
       `;
