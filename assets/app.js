@@ -143,6 +143,11 @@
       value: stats.highLow30 ? `${stats.highLow30.high} / ${stats.highLow30.low} L/min` : "—",
       zoneClass: "",
     });
+    cards.push({
+      label: "Longest green streak",
+      value: `${stats.longestGreenStreak} reading${stats.longestGreenStreak === 1 ? "" : "s"}`,
+      zoneClass: "",
+    });
 
     const win30 = stats.windows.find((w) => w.days === 30);
     cards.push({
@@ -159,11 +164,6 @@
       label: "Red zone (30d)",
       value: win30 && win30.pct ? `${win30.pct.red}%` : "—",
       zoneClass: "zone-red",
-    });
-    cards.push({
-      label: "Longest green streak",
-      value: `${stats.longestGreenStreak} reading${stats.longestGreenStreak === 1 ? "" : "s"}`,
-      zoneClass: "",
     });
     cards.push({
       label: "Rescue inhaler use (30d)",
