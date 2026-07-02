@@ -81,7 +81,4 @@ peak-flow-tracker/
 │   └── workflows/
 │       ├── ingest-reading.yml       # checks allowed user → parses reading → appends to readings.json
 │       └── validate-data.yml        # lints readings.json/config.json shape on push
-└── peak-flow-tracker-spec.md        # original build spec
 ```
-
-See `peak-flow-tracker-spec.md` for the full data model and zone logic.
