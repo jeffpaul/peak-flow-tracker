@@ -39,7 +39,7 @@
   function init() {
     const form = document.getElementById("log-form");
     const entryDateTime = document.getElementById("entryDateTime");
-    const afterRescueSelect = document.getElementById("afterRescue");
+    const afterRescueCheckbox = document.getElementById("afterRescue");
 
     entryDateTime.value = nowLocalDatetimeValue();
 
@@ -59,7 +59,7 @@
         reading1: document.getElementById("reading1").value,
         reading2: document.getElementById("reading2").value,
         reading3: document.getElementById("reading3").value,
-        afterRescue: afterRescueSelect.value,
+        afterRescue: afterRescueCheckbox.checked ? "Yes" : "No",
         symptoms: checkedSymptomLabels(form).join(", "),
         notes: document.getElementById("notes").value,
       });
