@@ -96,12 +96,8 @@
     const zones = config.zones;
     const personalBest = entries.length ? Math.max(...entries.map((e) => e.best)) : null;
 
-    const windows = [30, 60, 90].map((days) => ({
-      days,
-      pct: zonePercentages(entries.filter((e) => withinDays(e, days)), zones),
-    }));
-
     const last30Entries = entries.filter((e) => withinDays(e, 30));
+    const zonePct30 = zonePercentages(last30Entries, zones);
     const average30 = last30Entries.length
       ? Math.round(last30Entries.reduce((sum, e) => sum + e.best, 0) / last30Entries.length)
       : null;
@@ -114,7 +110,7 @@
 
     return {
       personalBest,
-      windows,
+      zonePct30,
       longestGreenStreak: longestGreenStreak(entries, zones),
       rescue: rescueFrequency(entries),
       average30,
@@ -149,20 +145,19 @@
       zoneClass: "",
     });
 
-    const win30 = stats.windows.find((w) => w.days === 30);
     cards.push({
       label: "Green zone (30d)",
-      value: win30 && win30.pct ? `${win30.pct.green}%` : "—",
+      value: stats.zonePct30 ? `${stats.zonePct30.green}%` : "—",
       zoneClass: "zone-green",
     });
     cards.push({
       label: "Yellow zone (30d)",
-      value: win30 && win30.pct ? `${win30.pct.yellow}%` : "—",
+      value: stats.zonePct30 ? `${stats.zonePct30.yellow}%` : "—",
       zoneClass: "zone-yellow",
     });
     cards.push({
       label: "Red zone (30d)",
-      value: win30 && win30.pct ? `${win30.pct.red}%` : "—",
+      value: stats.zonePct30 ? `${stats.zonePct30.red}%` : "—",
       zoneClass: "zone-red",
     });
     cards.push({
