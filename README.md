@@ -12,37 +12,21 @@ This repo is public but **de-identified**: no name, birthdate, or other identify
 
 ## One-time setup
 
-### 1. Repo Variables
-
-Go to **Settings → Secrets and variables → Actions → Variables tab** and set:
-
-| Variable | Default | Purpose |
-|---|---|---|
-| `ALLOWED_USERS` | `jeffpaul` | Comma-separated GitHub usernames allowed to submit readings (case-insensitive). |
-| `GREEN_MIN` | `240` | Lower bound of green zone (L/min) |
-| `GREEN_MAX` | `300` | Upper bound of green zone (L/min) |
-| `YELLOW_MIN` | `150` | Lower bound of yellow zone |
-| `YELLOW_MAX` | `240` | Upper bound of yellow zone |
-| `RED_MAX` | `150` | Anything below this is red zone |
-
-These variables drive the `Ingest Reading` workflow's zone classification for new readings (it reads `vars` directly). They're **not** read by the dashboard — GitHub Pages serves static files and can't query repo Variables at runtime, so the dashboard reads the plain thresholds out of `data/config.json` instead.
-
-That means the two are two separate copies of the same numbers, and nothing keeps them in sync automatically. If a doctor visit changes the thresholds:
-1. Update the Variables above (affects newly-logged readings going forward).
-2. Also hand-edit `data/config.json` to match (affects the dashboard's zone bands/stats going forward) — ask Claude Code to do this and commit if you'd rather not edit JSON directly.
-
-Historical entries in `data/readings.json` already have their zone baked in at ingest time and won't be reclassified retroactively either way.
-
-### 2. Enable GitHub Pages
+### Enable GitHub Pages
 
 **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main`, folder `/ (root)`.
+
+That's it — there are no repo Variables or Secrets to configure. Everything the app needs lives in the repo itself:
+
+- **Zone thresholds** live only in `data/config.json`, and both the dashboard and the `Ingest Reading` workflow read that same file — one source of truth, no duplication. If a doctor visit changes the thresholds, hand-edit `data/config.json` (or ask Claude Code to do it) and commit; it takes effect for both the dashboard and newly-logged readings right away. Historical entries already have their zone baked in at ingest time and won't be reclassified retroactively.
+- **Who can submit readings** is a hardcoded array (`ALLOWED_USERS`) near the top of the "Check authorization" step in `.github/workflows/ingest-reading.yml`. To add or change authorized submitters, edit that array directly (a commit/PR) rather than a Settings page — a deliberate tradeoff for keeping this to zero repo configuration.
 
 ## Logging a reading on your phone
 
 - **GitHub mobile app:** Repo → Issues → "+" → "Log a reading" template.
 - **Faster:** bookmark `https://github.com/<owner>/<repo>/issues/new?template=reading.yml` directly to your homescreen — it jumps straight to the form.
 
-Only usernames listed in `ALLOWED_USERS` can submit; anyone else gets a comment and the issue is closed automatically.
+Only usernames listed in `ALLOWED_USERS` (in `ingest-reading.yml`) can submit; anyone else gets a comment and the issue is closed automatically.
 
 ## Resetting to real data
 
@@ -58,7 +42,7 @@ peak-flow-tracker/
 │   └── style.css
 ├── data/
 │   ├── readings.json                # array of reading entries
-│   └── config.json                  # zone thresholds for the dashboard — hand-edited, keep in sync with repo Variables
+│   └── config.json                  # zone thresholds — single source of truth for dashboard + ingest workflow, hand-edited
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
 │   │   └── reading.yml              # structured issue form for logging a reading

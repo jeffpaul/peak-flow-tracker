@@ -12,23 +12,17 @@ jobs:
   ingest:
     if: contains(github.event.issue.labels.*.name, 'reading')
     runs-on: ubuntu-latest
-    env:
-      ALLOWED_USERS: ${{ vars.ALLOWED_USERS }}
-      GREEN_MIN: ${{ vars.GREEN_MIN }}
-      GREEN_MAX: ${{ vars.GREEN_MAX }}
-      YELLOW_MIN: ${{ vars.YELLOW_MIN }}
-      YELLOW_MAX: ${{ vars.YELLOW_MAX }}
-      RED_MAX: ${{ vars.RED_MAX }}
     steps:
       - name: Check authorization
         id: auth
         uses: actions/github-script@v7
         with:
           script: |
-            const allowed = (process.env.ALLOWED_USERS || 'jeffpaul')
-              .split(',')
-              .map((s) => s.trim().toLowerCase())
-              .filter(Boolean);
+            // GitHub usernames allowed to submit readings (case-insensitive).
+            // Edit this list directly (via a commit/PR) to change who can log readings.
+            const ALLOWED_USERS = ['jeffpaul'];
+
+            const allowed = ALLOWED_USERS.map((s) => s.trim().toLowerCase()).filter(Boolean);
             const author = context.payload.issue.user.login.toLowerCase();
             const authorized = allowed.includes(author);
             core.setOutput('authorized', String(authorized));
@@ -131,8 +125,10 @@ jobs:
               return;
             }
 
-            const GREEN_MIN = Number(process.env.GREEN_MIN || 240);
-            const YELLOW_MIN = Number(process.env.YELLOW_MIN || 150);
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, 'data', 'config.json');
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const GREEN_MIN = config.zones.green.min;
+            const YELLOW_MIN = config.zones.yellow.min;
 
             function zoneFor(value) {
               if (value >= GREEN_MIN) return 'green';
