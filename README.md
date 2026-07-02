@@ -1,5 +1,6 @@
 # Peak Flow Tracker
 
+[![MIT License](https://img.shields.io/github/license/jeffpaul/peak-flow-tracker.svg)](https://github.com/jeffpaul/peak-flow-tracker/blob/main/LICENSE)
 [![Ingest Reading](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/ingest-reading.yml/badge.svg)](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/ingest-reading.yml) [![Validate Data](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/validate-data.yml/badge.svg)](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/validate-data.yml) [![pages-build-deployment](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/pages/pages-build-deployment)
 
 > Log peak flow readings via a GitHub Issue, view trends on a static dashboard. No backend, no accounts.
