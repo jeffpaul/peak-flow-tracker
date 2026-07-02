@@ -11,9 +11,10 @@ This repo is public but **de-identified**: no name, birthdate, or other identify
 
 ## How it works
 
-1. Open a new issue using the **Log a reading** template (`.github/ISSUE_TEMPLATE/reading.yml`) from the GitHub app, or the web.
-2. The `Ingest Reading` workflow checks that you're an authorized submitter, parses the form, computes the best-of-3 reading and its zone, appends it to `data/readings.json`, comments on the issue with the result, and closes it.
-3. The dashboard (`index.html`, served by GitHub Pages) reads `data/readings.json` and `data/config.json` to render the chart, stats, and history table.
+1. Fill in a reading on `log.html` — a small static form with native date/time pickers — or open a new issue directly using the **Log a reading** template (`.github/ISSUE_TEMPLATE/reading.yml`).
+2. `log.html` doesn't submit anything itself; it redirects to GitHub's own "new issue" page with every field pre-filled via query parameters, so you just review and tap **Submit new issue** there. No token or credential ever touches the page.
+3. The `Ingest Reading` workflow checks that you're an authorized submitter, parses the form, computes the best-of-3 reading and its zone, appends it to `data/readings.json`, comments on the issue with the result, and closes it.
+4. The dashboard (`index.html`, served by GitHub Pages) reads `data/readings.json` and `data/config.json` to render the chart, stats, and history table.
 
 ## One-time setup
 
@@ -35,10 +36,13 @@ That's it — there are no repo Variables or Secrets to configure. Everything th
 
 ## Logging a reading on your phone
 
+- **Fastest:** bookmark `https://<owner>.github.io/<repo>/log.html` to your homescreen. It gives you a real native date/time picker instead of typing `YYYY-MM-DD` and `HH:MM` by hand, then hands off to GitHub to finish submitting.
 - **GitHub mobile app:** Repo → Issues → "+" → "Log a reading" template.
-- **Faster:** bookmark `https://github.com/<owner>/<repo>/issues/new?template=reading.yml` directly to your homescreen — it jumps straight to the form.
+- **Also fast:** bookmark `https://github.com/<owner>/<repo>/issues/new?template=reading.yml` directly — it jumps straight to the form (no date/time picker, but zero extra taps).
 
-Only usernames listed in `allowedUsers` (in `data/config.json`) can submit; anyone else gets a comment and the issue is closed automatically.
+Only usernames listed in `allowedUsers` (in `data/config.json`) can submit; anyone else gets a comment and the issue is closed automatically — this is unchanged regardless of which entry point you use, since `log.html` is just a nicer form in front of the same issue template.
+
+`log.html` hardcodes the repo owner/name (`jeffpaul/peak-flow-tracker`) at the top of `assets/log.js` to build the redirect URL — update that constant if the repo is ever renamed or forked.
 
 ## Resetting to real data
 
@@ -49,8 +53,10 @@ The seed data in `data/readings.json` is there so you can see the dashboard work
 ```
 peak-flow-tracker/
 ├── index.html                      # Dashboard: chart + history table (read-only)
+├── log.html                         # Fast-entry form with native date/time pickers → redirects to GitHub
 ├── assets/
 │   ├── app.js
+│   ├── log.js
 │   └── style.css
 ├── data/
 │   ├── readings.json                # array of reading entries

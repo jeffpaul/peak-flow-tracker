@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Log a Reading — Peak Flow Tracker</title>
+  <meta name="description" content="Log a peak flow reading with native date/time pickers, then finish on GitHub." />
+  <link rel="stylesheet" href="assets/style.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <h1>Log a Reading</h1>
+      <p>Fill this in, then review and submit on GitHub.</p>
+    </header>
+
+    <main>
+      <form id="log-form" class="card form-card">
+        <div class="field">
+          <label for="entryDateTime">Date &amp; time</label>
+          <input type="datetime-local" id="entryDateTime" required />
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="reading1">Reading 1 (L/min)</label>
+            <input type="number" id="reading1" inputmode="numeric" placeholder="280" required />
+          </div>
+          <div class="field">
+            <label for="reading2">Reading 2 (L/min)</label>
+            <input type="number" id="reading2" inputmode="numeric" placeholder="275" required />
+          </div>
+          <div class="field">
+            <label for="reading3">Reading 3 (L/min)</label>
+            <input type="number" id="reading3" inputmode="numeric" placeholder="290" required />
+          </div>
+        </div>
+
+        <div class="field-row">
+          <div class="field">
+            <label for="beforeRescue">Taken before rescue inhaler?</label>
+            <select id="beforeRescue">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="afterRescue">Taken after rescue inhaler?</label>
+            <select id="afterRescue">
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="after-rescue-fields" class="field-row" hidden>
+          <div class="field">
+            <label for="afterReading1">After-rescue reading 1</label>
+            <input type="number" id="afterReading1" inputmode="numeric" placeholder="310" />
+          </div>
+          <div class="field">
+            <label for="afterReading2">After-rescue reading 2</label>
+            <input type="number" id="afterReading2" inputmode="numeric" placeholder="305" />
+          </div>
+          <div class="field">
+            <label for="afterReading3">After-rescue reading 3</label>
+            <input type="number" id="afterReading3" inputmode="numeric" placeholder="315" />
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Symptoms</label>
+          <div class="checkbox-row">
+            <label class="checkbox-label"><input type="checkbox" name="symptom" value="Cough" /> Cough</label>
+            <label class="checkbox-label"><input type="checkbox" name="symptom" value="Wheeze" /> Wheeze</label>
+            <label class="checkbox-label"><input type="checkbox" name="symptom" value="Nighttime awakening" /> Nighttime awakening</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="3" placeholder="Optional — activity, triggers, medication changes, etc."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn">Continue to GitHub</button>
+        <p class="form-note">This takes you to a pre-filled GitHub issue — you'll still need to tap <strong>Submit new issue</strong> there to log it.</p>
+      </form>
+
+      <p class="back-link"><a href="index.html">&larr; Back to dashboard</a></p>
+    </main>
+
+    <footer class="site-footer">
+      <p>Data lives in <code>data/readings.json</code>, entered via a GitHub Issue Form. This page never talks to GitHub except to hand off to its own new-issue page.</p>
+    </footer>
+  </div>
+
+  <script src="assets/log.js"></script>
+</body>
+</html>
