@@ -22,7 +22,17 @@ This repo is public but **de-identified**: no name, birthdate, or other identify
 
 **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main`, folder `/ (root)`.
 
-That's it — there are no repo Variables or Secrets to configure. Everything the app needs lives in `data/config.json`, which both the dashboard and the `Ingest Reading` workflow read directly — one source of truth, no duplication:
+### Create the `reading` label
+
+`reading.yml` declares `labels: ["reading"]`, but GitHub only auto-applies a label from an issue form if that label **already exists** in the repo — it won't create it. `Ingest Reading` only runs on issues with that label, so until it exists, every submission gets silently skipped (not failed — just never runs). Create it once:
+
+```
+gh label create reading --repo <owner>/<repo> --description "Peak flow reading submission" --color "2563eb"
+```
+
+Or via the web UI: **Issues → Labels → New label**, name it exactly `reading`.
+
+That's it for setup beyond Pages and this label — there are no repo Variables or Secrets to configure. Everything the app needs lives in `data/config.json`, which both the dashboard and the `Ingest Reading` workflow read directly — one source of truth, no duplication:
 
 ```json
 {
