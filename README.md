@@ -1,5 +1,9 @@
 # Peak Flow Tracker
 
+[![Ingest Reading](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/ingest-reading.yml/badge.svg)](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/ingest-reading.yml) [![Validate Data](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/validate-data.yml/badge.svg)](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/validate-data.yml) [![pages-build-deployment](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/jeffpaul/peak-flow-tracker/actions/workflows/pages/pages-build-deployment)
+
+> Log peak flow readings via a GitHub Issue, view trends on a static dashboard. No backend, no accounts.
+
 A GitHub-repo-based tool for logging peak flow meter readings from a phone and viewing trends over time. No backend, no accounts, no tokens on the phone — readings come in as a GitHub Issue, a GitHub Action files them into `data/readings.json`, and a static dashboard on GitHub Pages reads that file directly.
 
 This repo is public but **de-identified**: no name, birthdate, or other identifying detail is stored anywhere (code, config, commit messages, or the repo description). Dates/times of readings are visible publicly — a reasonable tradeoff for keeping this simple and free to run.
