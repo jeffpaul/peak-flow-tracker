@@ -304,6 +304,8 @@ footer.site-footer a {
   background: #fff;
   font-family: inherit;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .field input[type="checkbox"] {
