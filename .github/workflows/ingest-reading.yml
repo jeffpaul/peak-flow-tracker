@@ -103,6 +103,32 @@ jobs:
             const symptomsBlock = extractField('Symptoms');
             const notes = extractField('Notes');
 
+            const READING_MIN = 60;
+            const READING_MAX = 800;
+            const outOfRange = [
+              { label: 'Reading 1', value: reading1 },
+              { label: 'Reading 2', value: reading2 },
+              { label: 'Reading 3', value: reading3 },
+            ].filter((r) => r.value !== null && (r.value < READING_MIN || r.value > READING_MAX));
+
+            if (outOfRange.length > 0) {
+              const list = outOfRange.map((r) => `${r.label} (${r.value})`).join(', ');
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `${list} ${outOfRange.length > 1 ? 'are' : 'is'} outside the plausible range (${READING_MIN}-${READING_MAX} L/min). Please check for a typo and open a new issue with the corrected value.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: 'closed',
+              });
+              core.setOutput('appended', 'false');
+              return;
+            }
+
             const readings = [reading1, reading2, reading3].filter((n) => n !== null);
             const best = readings.length ? Math.max(...readings) : null;
 

@@ -40,6 +40,8 @@ jobs:
 
             const requiredStringFields = ['id', 'date', 'time', 'period'];
             const requiredBoolFields = ['afterRescue'];
+            const READING_MIN = 60;
+            const READING_MAX = 800;
 
             readings.forEach((entry, i) => {
               for (const field of requiredStringFields) {
@@ -49,9 +51,13 @@ jobs:
               }
               if (!Array.isArray(entry.readings) || entry.readings.some((n) => typeof n !== 'number')) {
                 fail(`Entry ${i} (${entry.id || 'unknown'}) must have a "readings" array of numbers`);
+              } else if (entry.readings.some((n) => n < READING_MIN || n > READING_MAX)) {
+                fail(`Entry ${i} (${entry.id || 'unknown'}) has a reading outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
               }
               if (typeof entry.best !== 'number') {
                 fail(`Entry ${i} (${entry.id || 'unknown'}) is missing numeric field "best"`);
+              } else if (entry.best < READING_MIN || entry.best > READING_MAX) {
+                fail(`Entry ${i} (${entry.id || 'unknown'}) "best" (${entry.best}) is outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
               }
               for (const field of requiredBoolFields) {
                 if (typeof entry[field] !== 'boolean') {
@@ -76,6 +82,9 @@ jobs:
               }
               if (!Array.isArray(config.allowedUsers) || config.allowedUsers.length === 0 || config.allowedUsers.some((u) => typeof u !== 'string' || u.trim() === '')) {
                 fail('data/config.json "allowedUsers" must be a non-empty array of usernames — an empty/missing list would lock everyone out of Ingest Reading');
+              }
+              if (!Number.isInteger(config.schemaVersion) || config.schemaVersion < 1) {
+                fail('data/config.json "schemaVersion" must be a positive integer');
               }
             }
 

@@ -36,6 +36,7 @@ That's it for setup beyond Pages and this label — there are no repo Variables 
 
 ```json
 {
+  "schemaVersion": 1,
   "zones": { "green": { "min": 240, "max": 300 }, "yellow": { "min": 150, "max": 240 }, "red": { "max": 150 } },
   "allowedUsers": ["jeffpaul"]
 }
@@ -43,6 +44,9 @@ That's it for setup beyond Pages and this label — there are no repo Variables 
 
 - **Zone thresholds** (`zones`) — if a doctor visit changes them, hand-edit `data/config.json` (or ask Claude Code to do it) and commit; it takes effect for both the dashboard and newly-logged readings right away. Historical entries already have their zone baked in at ingest time and won't be reclassified retroactively.
 - **Who can submit readings** (`allowedUsers`) — a plain array of GitHub usernames, matched case-insensitively. Add or remove names here and commit; `validate-data.yml` will fail the push if this ends up empty or malformed, since that would silently lock everyone out of `Ingest Reading`.
+- **Schema version** (`schemaVersion`) — a plain marker for `data/readings.json`'s entry shape, currently `1`. Nothing reads this yet; it exists so that if the schema needs to change after real data is flowing, there's a version to bump and branch on instead of having to infer the shape from which fields happen to be present on older entries.
+
+Readings are also sanity-bounded to **60–800 L/min** — `log.html` enforces this natively, `Ingest Reading` rejects (comments + closes without appending) any issue with a reading outside that range rather than silently dropping or clamping it, and `validate-data.yml` re-checks it on every push as a backstop against a bad hand-edit.
 
 ## Logging a reading on your phone
 
