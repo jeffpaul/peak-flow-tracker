@@ -77,6 +77,9 @@ jobs:
               if (typeof zones.green?.min !== 'number' || typeof zones.yellow?.min !== 'number' || typeof zones.red?.max !== 'number') {
                 fail('data/config.json "zones" is missing required numeric thresholds');
               }
+              if (!Array.isArray(config.allowedUsers) || config.allowedUsers.length === 0 || config.allowedUsers.some((u) => typeof u !== 'string' || u.trim() === '')) {
+                fail('data/config.json "allowedUsers" must be a non-empty array of usernames — an empty/missing list would lock everyone out of Ingest Reading');
+              }
             }
 
             if (!core.summary) return;

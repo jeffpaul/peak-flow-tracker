@@ -16,17 +16,24 @@ This repo is public but **de-identified**: no name, birthdate, or other identify
 
 **Settings → Pages** → Source: **Deploy from a branch** → Branch: `main`, folder `/ (root)`.
 
-That's it — there are no repo Variables or Secrets to configure. Everything the app needs lives in the repo itself:
+That's it — there are no repo Variables or Secrets to configure. Everything the app needs lives in `data/config.json`, which both the dashboard and the `Ingest Reading` workflow read directly — one source of truth, no duplication:
 
-- **Zone thresholds** live only in `data/config.json`, and both the dashboard and the `Ingest Reading` workflow read that same file — one source of truth, no duplication. If a doctor visit changes the thresholds, hand-edit `data/config.json` (or ask Claude Code to do it) and commit; it takes effect for both the dashboard and newly-logged readings right away. Historical entries already have their zone baked in at ingest time and won't be reclassified retroactively.
-- **Who can submit readings** is a hardcoded array (`ALLOWED_USERS`) near the top of the "Check authorization" step in `.github/workflows/ingest-reading.yml`. To add or change authorized submitters, edit that array directly (a commit/PR) rather than a Settings page — a deliberate tradeoff for keeping this to zero repo configuration.
+```json
+{
+  "zones": { "green": { "min": 240, "max": 300 }, "yellow": { "min": 150, "max": 240 }, "red": { "max": 150 } },
+  "allowedUsers": ["jeffpaul"]
+}
+```
+
+- **Zone thresholds** (`zones`) — if a doctor visit changes them, hand-edit `data/config.json` (or ask Claude Code to do it) and commit; it takes effect for both the dashboard and newly-logged readings right away. Historical entries already have their zone baked in at ingest time and won't be reclassified retroactively.
+- **Who can submit readings** (`allowedUsers`) — a plain array of GitHub usernames, matched case-insensitively. Add or remove names here and commit; `validate-data.yml` will fail the push if this ends up empty or malformed, since that would silently lock everyone out of `Ingest Reading`.
 
 ## Logging a reading on your phone
 
 - **GitHub mobile app:** Repo → Issues → "+" → "Log a reading" template.
 - **Faster:** bookmark `https://github.com/<owner>/<repo>/issues/new?template=reading.yml` directly to your homescreen — it jumps straight to the form.
 
-Only usernames listed in `ALLOWED_USERS` (in `ingest-reading.yml`) can submit; anyone else gets a comment and the issue is closed automatically.
+Only usernames listed in `allowedUsers` (in `data/config.json`) can submit; anyone else gets a comment and the issue is closed automatically.
 
 ## Resetting to real data
 
@@ -42,7 +49,7 @@ peak-flow-tracker/
 │   └── style.css
 ├── data/
 │   ├── readings.json                # array of reading entries
-│   └── config.json                  # zone thresholds — single source of truth for dashboard + ingest workflow, hand-edited
+│   └── config.json                  # zone thresholds + allowed submitters — single source of truth, hand-edited
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
 │   │   └── reading.yml              # structured issue form for logging a reading

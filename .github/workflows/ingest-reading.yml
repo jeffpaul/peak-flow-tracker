@@ -13,16 +13,23 @@ jobs:
     if: contains(github.event.issue.labels.*.name, 'reading')
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Check authorization
         id: auth
         uses: actions/github-script@v7
         with:
           script: |
-            // GitHub usernames allowed to submit readings (case-insensitive).
-            // Edit this list directly (via a commit/PR) to change who can log readings.
-            const ALLOWED_USERS = ['jeffpaul'];
+            const fs = require('fs');
+            const path = require('path');
 
-            const allowed = ALLOWED_USERS.map((s) => s.trim().toLowerCase()).filter(Boolean);
+            // Editable list of GitHub usernames allowed to submit readings
+            // (case-insensitive) — see the "allowedUsers" field in data/config.json.
+            const configPath = path.join(process.env.GITHUB_WORKSPACE, 'data', 'config.json');
+            const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+            const allowed = (config.allowedUsers || []).map((s) => s.trim().toLowerCase()).filter(Boolean);
+
             const author = context.payload.issue.user.login.toLowerCase();
             const authorized = allowed.includes(author);
             core.setOutput('authorized', String(authorized));
@@ -41,10 +48,6 @@ jobs:
                 state: 'closed',
               });
             }
-
-      - name: Checkout
-        if: steps.auth.outputs.authorized == 'true'
-        uses: actions/checkout@v4
 
       - name: Parse reading and append entry
         if: steps.auth.outputs.authorized == 'true'
