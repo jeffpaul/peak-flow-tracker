@@ -75,10 +75,12 @@ jobs:
               return Number.isFinite(n) ? n : null;
             }
 
-            function symptomChecked(block, name) {
-              const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-              const re = new RegExp(`-\\s*\\[(x|X)\\]\\s*${escaped}`);
-              return re.test(block);
+            function symptomChecked(commaSeparatedText, name) {
+              const items = commaSeparatedText
+                .split(',')
+                .map((s) => s.trim().toLowerCase())
+                .filter(Boolean);
+              return items.includes(name.toLowerCase());
             }
 
             function to24Hour(time, period) {

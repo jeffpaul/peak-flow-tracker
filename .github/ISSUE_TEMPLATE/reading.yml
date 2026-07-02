@@ -90,14 +90,14 @@ body:
       placeholder: "315"
     validations:
       required: false
-  - type: checkboxes
+  - type: input
     id: symptoms
     attributes:
       label: Symptoms
-      options:
-        - label: Cough
-        - label: Wheeze
-        - label: Nighttime awakening
+      description: 'Comma-separate any that apply: Cough, Wheeze, Nighttime awakening. Leave blank if none.'
+      placeholder: "Cough, Wheeze"
+    validations:
+      required: false
   - type: textarea
     id: notes
     attributes:
