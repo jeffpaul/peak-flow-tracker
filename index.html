@@ -41,7 +41,7 @@
             <option value="yellow">Yellow</option>
             <option value="red">Red</option>
           </select>
-          <input id="text-filter" type="text" placeholder="Search date, time, or notes…" aria-label="Search readings" />
+          <input id="text-filter" type="text" placeholder="Search date, time, symptoms, or notes…" aria-label="Search readings" />
         </div>
         <div class="table-scroll">
           <table class="history">
@@ -59,6 +59,11 @@
             </thead>
             <tbody id="history-tbody"></tbody>
           </table>
+        </div>
+        <div class="pagination">
+          <button id="page-prev" type="button">&larr; Previous</button>
+          <span id="page-info"></span>
+          <button id="page-next" type="button">Next &rarr;</button>
         </div>
       </section>
     </main>

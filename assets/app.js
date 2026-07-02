@@ -8,6 +8,8 @@
     sortDir: "desc",
     filterZone: "all",
     filterText: "",
+    page: 1,
+    pageSize: 10,
   };
 
   function zoneFor(value, zones) {
@@ -97,11 +99,24 @@
       pct: zonePercentages(entries.filter((e) => withinDays(e, days)), zones),
     }));
 
+    const last30Entries = entries.filter((e) => withinDays(e, 30));
+    const average30 = last30Entries.length
+      ? Math.round(last30Entries.reduce((sum, e) => sum + e.best, 0) / last30Entries.length)
+      : null;
+    const highLow30 = last30Entries.length
+      ? {
+          high: Math.max(...last30Entries.map((e) => e.best)),
+          low: Math.min(...last30Entries.map((e) => e.best)),
+        }
+      : null;
+
     return {
       personalBest,
       windows,
       longestGreenStreak: longestGreenStreak(entries, zones),
       rescue: rescueFrequency(entries),
+      average30,
+      highLow30,
     };
   }
 
@@ -114,6 +129,16 @@
     cards.push({
       label: "Personal best",
       value: stats.personalBest !== null ? `${stats.personalBest} L/min` : "—",
+      zoneClass: "",
+    });
+    cards.push({
+      label: "Average (30d)",
+      value: stats.average30 !== null ? `${stats.average30} L/min` : "—",
+      zoneClass: "",
+    });
+    cards.push({
+      label: "High / Low (30d)",
+      value: stats.highLow30 ? `${stats.highLow30.high} / ${stats.highLow30.low} L/min` : "—",
       zoneClass: "",
     });
 
@@ -248,13 +273,22 @@
     });
   }
 
+  function symptomSearchTerms(entry) {
+    const symptoms = entry.symptoms || {};
+    const terms = [];
+    if (symptoms.cough) terms.push("cough");
+    if (symptoms.wheeze) terms.push("wheeze");
+    if (symptoms.nighttimeAwakening) terms.push("nighttime awakening", "night waking");
+    return terms.join(" ");
+  }
+
   function applyFilters(entries) {
     return entries.filter((e) => {
       if (state.filterZone !== "all" && zoneFor(e.best, state.config.zones) !== state.filterZone) {
         return false;
       }
       if (state.filterText) {
-        const haystack = `${e.date} ${e.time} ${e.symptoms.notes || ""}`.toLowerCase();
+        const haystack = `${e.date} ${e.time} ${symptomSearchTerms(e)} ${(e.symptoms && e.symptoms.notes) || ""}`.toLowerCase();
         if (!haystack.includes(state.filterText.toLowerCase())) return false;
       }
       return true;
@@ -276,20 +310,35 @@
     });
   }
 
+  function renderPagination(totalItems, totalPages) {
+    document.getElementById("page-info").textContent = `Page ${state.page} of ${totalPages} (${totalItems} total)`;
+    document.getElementById("page-prev").disabled = state.page <= 1;
+    document.getElementById("page-next").disabled = state.page >= totalPages;
+  }
+
   function renderTable() {
     const filtered = applyFilters(state.entries);
     const sorted = sortEntries(filtered);
     const tbody = document.getElementById("history-tbody");
     tbody.innerHTML = "";
 
-    if (!sorted.length) {
+    const totalItems = sorted.length;
+    const totalPages = Math.max(1, Math.ceil(totalItems / state.pageSize));
+    if (state.page > totalPages) state.page = totalPages;
+    if (state.page < 1) state.page = 1;
+
+    if (!totalItems) {
       const emptyRow = document.createElement("tr");
       emptyRow.innerHTML = `<td colspan="8" class="empty-state">No readings match the current filter.</td>`;
       tbody.appendChild(emptyRow);
+      renderPagination(totalItems, totalPages);
       return;
     }
 
-    sorted.forEach((e) => {
+    const start = (state.page - 1) * state.pageSize;
+    const pageItems = sorted.slice(start, start + state.pageSize);
+
+    pageItems.forEach((e) => {
       const zone = zoneFor(e.best, state.config.zones);
       const symptomList = ["cough", "wheeze", "nighttimeAwakening"]
         .filter((s) => e.symptoms && e.symptoms[s])
@@ -309,6 +358,8 @@
       `;
       tbody.appendChild(tr);
     });
+
+    renderPagination(totalItems, totalPages);
   }
 
   function updateSortIndicators() {
@@ -320,10 +371,20 @@
   function wireControls() {
     document.getElementById("zone-filter").addEventListener("change", (ev) => {
       state.filterZone = ev.target.value;
+      state.page = 1;
       renderTable();
     });
     document.getElementById("text-filter").addEventListener("input", (ev) => {
       state.filterText = ev.target.value;
+      state.page = 1;
+      renderTable();
+    });
+    document.getElementById("page-prev").addEventListener("click", () => {
+      state.page -= 1;
+      renderTable();
+    });
+    document.getElementById("page-next").addEventListener("click", () => {
+      state.page += 1;
       renderTable();
     });
     document.querySelectorAll("table.history th[data-key]").forEach((th) => {
@@ -335,6 +396,7 @@
           state.sortKey = key;
           state.sortDir = "desc";
         }
+        state.page = 1;
         updateSortIndicators();
         renderTable();
       });
