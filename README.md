@@ -42,7 +42,7 @@ That's it for setup beyond Pages and this label — there are no repo Variables 
 }
 ```
 
-- **Zone thresholds** (`zones`) — if a doctor visit changes them, hand-edit `data/config.json` (or ask Claude Code to do it) and commit; it takes effect for both the dashboard and newly-logged readings right away. Historical entries already have their zone baked in at ingest time and won't be reclassified retroactively.
+- **Zone thresholds** (`zones`) — if a doctor visit changes them, hand-edit `data/config.json` and commit; it takes effect for both the dashboard and newly-logged readings right away. Historical entries already have their zone baked in at ingest time and won't be reclassified retroactively.
 - **Who can submit readings** (`allowedUsers`) — a plain array of GitHub usernames, matched case-insensitively. Add or remove names here and commit; `validate-data.yml` will fail the push if this ends up empty or malformed, since that would silently lock everyone out of `Ingest Reading`.
 - **Schema version** (`schemaVersion`) — a plain marker for `data/readings.json`'s entry shape, currently `1`. Nothing reads this yet; it exists so that if the schema needs to change after real data is flowing, there's a version to bump and branch on instead of having to infer the shape from which fields happen to be present on older entries.
 
@@ -60,7 +60,7 @@ Only usernames listed in `allowedUsers` (in `data/config.json`) can submit; anyo
 
 ## Resetting to real data
 
-The seed data in `data/readings.json` is there so you can see the dashboard working before you've logged anything real. There's intentionally no automated "reset" workflow for this — ask Claude Code to wipe `data/readings.json` back to `[]` and commit when you're ready to stop looking at sample data, so it doesn't happen by accident once real data is in there.
+The seed data in `data/readings.json` is there so you can see the dashboard working before you've logged anything real. There's intentionally no automated "reset" workflow for this — when you're ready to stop looking at sample data, hand-edit `data/readings.json` back to `[]` and commit, so it doesn't happen by accident once real data is in there.
 
 ## Repo structure
 
