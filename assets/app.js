@@ -130,17 +130,17 @@
 
     cards.push({
       label: "Personal best",
-      value: stats.personalBest !== null ? `${stats.personalBest} L/min` : "—",
+      value: stats.personalBest !== null ? `${stats.personalBest}` : "—",
       zoneClass: "",
     });
     cards.push({
       label: "Average (30d)",
-      value: stats.average30 !== null ? `${stats.average30} L/min` : "—",
+      value: stats.average30 !== null ? `${stats.average30}` : "—",
       zoneClass: "",
     });
     cards.push({
       label: "High / Low (30d)",
-      value: stats.highLow30 ? `${stats.highLow30.high} / ${stats.highLow30.low} L/min` : "—",
+      value: stats.highLow30 ? `${stats.highLow30.high} / ${stats.highLow30.low}` : "—",
       zoneClass: "",
     });
     cards.push({
