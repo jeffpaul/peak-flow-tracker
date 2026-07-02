@@ -93,12 +93,12 @@ jobs:
 
             const date = extractField('Date');
             const time = extractField('Time');
-            const period = extractField('AM / PM');
+            const period = extractField('AM / PM').trim().toUpperCase();
             const reading1 = toNumber(extractField('Reading 1 (L/min)'));
             const reading2 = toNumber(extractField('Reading 2 (L/min)'));
             const reading3 = toNumber(extractField('Reading 3 (L/min)'));
-            const beforeRescue = extractField('Taken before rescue inhaler?') === 'Yes';
-            const afterRescue = extractField('Taken after rescue inhaler?') === 'Yes';
+            const beforeRescue = extractField('Taken before rescue inhaler?').trim().toLowerCase() === 'yes';
+            const afterRescue = extractField('Taken after rescue inhaler?').trim().toLowerCase() === 'yes';
             const afterReading1 = toNumber(extractField('After-rescue reading 1 (L/min) — optional'));
             const afterReading2 = toNumber(extractField('After-rescue reading 2 (L/min) — optional'));
             const afterReading3 = toNumber(extractField('After-rescue reading 3 (L/min) — optional'));

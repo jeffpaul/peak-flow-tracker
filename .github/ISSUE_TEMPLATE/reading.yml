@@ -23,13 +23,12 @@ body:
       placeholder: "07:15"
     validations:
       required: true
-  - type: dropdown
+  - type: input
     id: period
     attributes:
       label: AM / PM
-      options:
-        - AM
-        - PM
+      description: Type AM or PM (not case-sensitive)
+      placeholder: "AM"
     validations:
       required: true
   - type: input
@@ -53,22 +52,20 @@ body:
       placeholder: "290"
     validations:
       required: true
-  - type: dropdown
+  - type: input
     id: beforeRescue
     attributes:
       label: Taken before rescue inhaler?
-      options:
-        - "No"
-        - "Yes"
+      description: Type Yes or No (not case-sensitive)
+      placeholder: "No"
     validations:
       required: true
-  - type: dropdown
+  - type: input
     id: afterRescue
     attributes:
       label: Taken after rescue inhaler?
-      options:
-        - "No"
-        - "Yes"
+      description: Type Yes or No (not case-sensitive)
+      placeholder: "No"
     validations:
       required: true
   - type: input
