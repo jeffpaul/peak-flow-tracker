@@ -99,7 +99,6 @@ jobs:
             const reading1 = toNumber(extractField('Reading 1 (L/min)'));
             const reading2 = toNumber(extractField('Reading 2 (L/min)'));
             const reading3 = toNumber(extractField('Reading 3 (L/min)'));
-            const beforeRescue = extractField('Taken before rescue inhaler?').trim().toLowerCase() === 'yes';
             const afterRescue = extractField('Taken after rescue inhaler?').trim().toLowerCase() === 'yes';
             const afterReading1 = toNumber(extractField('After-rescue reading 1 (L/min) — optional'));
             const afterReading2 = toNumber(extractField('After-rescue reading 2 (L/min) — optional'));
@@ -144,7 +143,7 @@ jobs:
             const zone = zoneFor(best);
 
             let rescueImprovement = null;
-            if (beforeRescue && afterRescue && afterRescueBest !== null && best > 0) {
+            if (afterRescue && afterRescueBest !== null && best > 0) {
               const pctIncrease = (afterRescueBest - best) / best;
               if (pctIncrease >= 0.2) {
                 rescueImprovement = Math.round(pctIncrease * 100);
@@ -161,7 +160,6 @@ jobs:
               period,
               readings,
               best,
-              beforeRescue,
               afterRescue,
               afterRescueBest,
               symptoms: {

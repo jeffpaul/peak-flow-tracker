@@ -39,7 +39,7 @@ jobs:
             }
 
             const requiredStringFields = ['id', 'date', 'time', 'period'];
-            const requiredBoolFields = ['beforeRescue', 'afterRescue'];
+            const requiredBoolFields = ['afterRescue'];
 
             readings.forEach((entry, i) => {
               for (const field of requiredStringFields) {

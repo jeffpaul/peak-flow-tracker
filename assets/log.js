@@ -65,7 +65,6 @@
         reading1: document.getElementById("reading1").value,
         reading2: document.getElementById("reading2").value,
         reading3: document.getElementById("reading3").value,
-        beforeRescue: document.getElementById("beforeRescue").value,
         afterRescue: afterRescueSelect.value,
         afterReading1: document.getElementById("afterReading1").value,
         afterReading2: document.getElementById("afterReading2").value,

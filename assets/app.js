@@ -18,7 +18,7 @@
   }
 
   function rescueImprovementPct(entry) {
-    if (!entry.beforeRescue || !entry.afterRescue || entry.afterRescueBest === null || !entry.best) {
+    if (!entry.afterRescue || entry.afterRescueBest === null || !entry.best) {
       return null;
     }
     const pct = ((entry.afterRescueBest - entry.best) / entry.best) * 100;
@@ -73,7 +73,7 @@
   }
 
   function rescueFrequency(entries) {
-    const usedRescue = (e) => e.beforeRescue || e.afterRescue;
+    const usedRescue = (e) => e.afterRescue;
     const last30 = entries.filter((e) => withinDays(e, 30));
     const prev30 = entries.filter((e) => {
       const now = new Date();

@@ -53,14 +53,6 @@ body:
     validations:
       required: true
   - type: input
-    id: beforeRescue
-    attributes:
-      label: Taken before rescue inhaler?
-      description: Type Yes or No (not case-sensitive)
-      placeholder: "No"
-    validations:
-      required: true
-  - type: input
     id: afterRescue
     attributes:
       label: Taken after rescue inhaler?
