@@ -55,33 +55,11 @@ body:
   - type: input
     id: afterRescue
     attributes:
-      label: Taken after rescue inhaler?
-      description: Type Yes or No (not case-sensitive)
+      label: Were the readings above taken after using a rescue inhaler?
+      description: Type Yes or No (not case-sensitive). If yes, log a follow-up reading a few minutes later with this set to Yes to track the recheck.
       placeholder: "No"
     validations:
       required: true
-  - type: input
-    id: afterReading1
-    attributes:
-      label: After-rescue reading 1 (L/min) — optional
-      description: Only fill in if "After rescue inhaler?" above is Yes
-      placeholder: "310"
-    validations:
-      required: false
-  - type: input
-    id: afterReading2
-    attributes:
-      label: After-rescue reading 2 (L/min) — optional
-      placeholder: "305"
-    validations:
-      required: false
-  - type: input
-    id: afterReading3
-    attributes:
-      label: After-rescue reading 3 (L/min) — optional
-      placeholder: "315"
-    validations:
-      required: false
   - type: input
     id: symptoms
     attributes:

@@ -139,7 +139,6 @@ header.site-header p {
 .swatch.green { background: var(--green); }
 .swatch.yellow { background: var(--yellow); }
 .swatch.red { background: var(--red); }
-.swatch.rescue { background: #ea580c; border-radius: 50%; }
 
 .table-controls {
   display: flex;

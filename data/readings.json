@@ -11,7 +11,6 @@
     ],
     "best": 270,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -31,7 +30,6 @@
     ],
     "best": 260,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": true,
       "wheeze": false,
@@ -51,7 +49,6 @@
     ],
     "best": 280,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -71,7 +68,6 @@
     ],
     "best": 265,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -91,7 +87,6 @@
     ],
     "best": 235,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": true,
       "wheeze": true,
@@ -111,7 +106,6 @@
     ],
     "best": 250,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -131,7 +125,6 @@
     ],
     "best": 275,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -150,13 +143,31 @@
       195
     ],
     "best": 195,
-    "afterRescue": true,
-    "afterRescueBest": 240,
+    "afterRescue": false,
     "symptoms": {
       "cough": false,
       "wheeze": true,
       "nighttimeAwakening": true,
       "notes": "Woke up wheezing around 3am, used rescue inhaler"
+    }
+  },
+  {
+    "id": "2026-06-22T07:35:00Z",
+    "date": "2026-06-22",
+    "time": "07:35",
+    "period": "AM",
+    "readings": [
+      235,
+      240,
+      238
+    ],
+    "best": 240,
+    "afterRescue": true,
+    "symptoms": {
+      "cough": false,
+      "wheeze": false,
+      "nighttimeAwakening": false,
+      "notes": "Recheck 15 min after rescue inhaler"
     }
   },
   {
@@ -171,7 +182,6 @@
     ],
     "best": 255,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -191,7 +201,6 @@
     ],
     "best": 285,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -211,7 +220,6 @@
     ],
     "best": 270,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -230,13 +238,31 @@
       145
     ],
     "best": 145,
-    "afterRescue": true,
-    "afterRescueBest": 205,
+    "afterRescue": false,
     "symptoms": {
       "cough": true,
       "wheeze": true,
       "nighttimeAwakening": true,
       "notes": "Rough morning — used rescue inhaler immediately, called doctor's office"
+    }
+  },
+  {
+    "id": "2026-06-24T07:20:00Z",
+    "date": "2026-06-24",
+    "time": "07:20",
+    "period": "AM",
+    "readings": [
+      200,
+      205,
+      202
+    ],
+    "best": 205,
+    "afterRescue": true,
+    "symptoms": {
+      "cough": false,
+      "wheeze": false,
+      "nighttimeAwakening": false,
+      "notes": "Recheck 15 min after rescue inhaler"
     }
   },
   {
@@ -251,7 +277,6 @@
     ],
     "best": 235,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": true,
       "wheeze": false,
@@ -271,7 +296,6 @@
     ],
     "best": 265,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -291,7 +315,6 @@
     ],
     "best": 250,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -311,7 +334,6 @@
     ],
     "best": 225,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": true,
       "wheeze": false,
@@ -331,7 +353,6 @@
     ],
     "best": 265,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,
@@ -351,7 +372,6 @@
     ],
     "best": 290,
     "afterRescue": false,
-    "afterRescueBest": null,
     "symptoms": {
       "cough": false,
       "wheeze": false,

@@ -40,14 +40,8 @@
     const form = document.getElementById("log-form");
     const entryDateTime = document.getElementById("entryDateTime");
     const afterRescueSelect = document.getElementById("afterRescue");
-    const afterFields = document.getElementById("after-rescue-fields");
 
     entryDateTime.value = nowLocalDatetimeValue();
-
-    afterFields.hidden = afterRescueSelect.value !== "Yes";
-    afterRescueSelect.addEventListener("change", () => {
-      afterFields.hidden = afterRescueSelect.value !== "Yes";
-    });
 
     form.addEventListener("submit", (ev) => {
       ev.preventDefault();
@@ -66,9 +60,6 @@
         reading2: document.getElementById("reading2").value,
         reading3: document.getElementById("reading3").value,
         afterRescue: afterRescueSelect.value,
-        afterReading1: document.getElementById("afterReading1").value,
-        afterReading2: document.getElementById("afterReading2").value,
-        afterReading3: document.getElementById("afterReading3").value,
         symptoms: checkedSymptomLabels(form).join(", "),
         notes: document.getElementById("notes").value,
       });

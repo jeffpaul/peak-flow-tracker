@@ -58,9 +58,6 @@ jobs:
                   fail(`Entry ${i} (${entry.id || 'unknown'}) is missing boolean field "${field}"`);
                 }
               }
-              if (entry.afterRescueBest !== null && typeof entry.afterRescueBest !== 'number') {
-                fail(`Entry ${i} (${entry.id || 'unknown'}) "afterRescueBest" must be a number or null`);
-              }
               if (!entry.symptoms || typeof entry.symptoms !== 'object') {
                 fail(`Entry ${i} (${entry.id || 'unknown'}) is missing "symptoms" object`);
               }

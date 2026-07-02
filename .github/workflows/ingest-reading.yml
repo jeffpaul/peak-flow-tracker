@@ -99,18 +99,12 @@ jobs:
             const reading1 = toNumber(extractField('Reading 1 (L/min)'));
             const reading2 = toNumber(extractField('Reading 2 (L/min)'));
             const reading3 = toNumber(extractField('Reading 3 (L/min)'));
-            const afterRescue = extractField('Taken after rescue inhaler?').trim().toLowerCase() === 'yes';
-            const afterReading1 = toNumber(extractField('After-rescue reading 1 (L/min) — optional'));
-            const afterReading2 = toNumber(extractField('After-rescue reading 2 (L/min) — optional'));
-            const afterReading3 = toNumber(extractField('After-rescue reading 3 (L/min) — optional'));
+            const afterRescue = extractField('Were the readings above taken after using a rescue inhaler?').trim().toLowerCase() === 'yes';
             const symptomsBlock = extractField('Symptoms');
             const notes = extractField('Notes');
 
             const readings = [reading1, reading2, reading3].filter((n) => n !== null);
             const best = readings.length ? Math.max(...readings) : null;
-
-            const afterReadings = [afterReading1, afterReading2, afterReading3].filter((n) => n !== null);
-            const afterRescueBest = afterReadings.length ? Math.max(...afterReadings) : null;
 
             if (best === null) {
               await github.rest.issues.createComment({
@@ -142,14 +136,6 @@ jobs:
 
             const zone = zoneFor(best);
 
-            let rescueImprovement = null;
-            if (afterRescue && afterRescueBest !== null && best > 0) {
-              const pctIncrease = (afterRescueBest - best) / best;
-              if (pctIncrease >= 0.2) {
-                rescueImprovement = Math.round(pctIncrease * 100);
-              }
-            }
-
             const { hh, mm } = to24Hour(time, period);
             const id = `${date}T${hh}:${mm}:00Z`;
 
@@ -161,7 +147,6 @@ jobs:
               readings,
               best,
               afterRescue,
-              afterRescueBest,
               symptoms: {
                 cough: symptomChecked(symptomsBlock, 'Cough'),
                 wheeze: symptomChecked(symptomsBlock, 'Wheeze'),
@@ -179,7 +164,7 @@ jobs:
             core.setOutput('appended', 'true');
             core.setOutput('best', String(best));
             core.setOutput('zone', zone);
-            core.setOutput('rescueImprovement', rescueImprovement === null ? '' : String(rescueImprovement));
+            core.setOutput('afterRescue', String(afterRescue));
 
       - name: Commit and push
         if: steps.auth.outputs.authorized == 'true' && steps.process.outputs.appended == 'true'
@@ -196,12 +181,12 @@ jobs:
         env:
           BEST: ${{ steps.process.outputs.best }}
           ZONE: ${{ steps.process.outputs.zone }}
-          RESCUE_IMPROVEMENT: ${{ steps.process.outputs.rescueImprovement }}
+          AFTER_RESCUE: ${{ steps.process.outputs.afterRescue }}
         with:
           script: |
             const best = process.env.BEST;
             const zone = process.env.ZONE;
-            const rescueImprovement = process.env.RESCUE_IMPROVEMENT;
+            const afterRescue = process.env.AFTER_RESCUE === 'true';
 
             const zoneCopy = {
               green: `Logged: ${best} L/min — Green zone ✅`,
@@ -211,8 +196,8 @@ jobs:
 
             let body = zoneCopy[zone] || `Logged: ${best} L/min`;
 
-            if (rescueImprovement) {
-              body += `\n\nPEF improved ${rescueImprovement}% after rescue inhaler use (≥20%) — per the action plan, this may mean it's time to talk to your doctor about adjusting controller medication.`;
+            if (afterRescue) {
+              body += `\n\n(Logged as taken after rescue inhaler use.)`;
             }
 
             await github.rest.issues.createComment({

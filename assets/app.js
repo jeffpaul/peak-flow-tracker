@@ -17,14 +17,6 @@
     return "red";
   }
 
-  function rescueImprovementPct(entry) {
-    if (!entry.afterRescue || entry.afterRescueBest === null || !entry.best) {
-      return null;
-    }
-    const pct = ((entry.afterRescueBest - entry.best) / entry.best) * 100;
-    return pct >= 20 ? Math.round(pct) : null;
-  }
-
   async function loadData() {
     const [readingsRes, configRes] = await Promise.all([
       fetch("data/readings.json", { cache: "no-store" }),
@@ -98,8 +90,7 @@
 
   function computeStats(entries, config) {
     const zones = config.zones;
-    const allBests = entries.flatMap((e) => [e.best, e.afterRescueBest].filter((v) => v !== null && v !== undefined));
-    const personalBest = allBests.length ? Math.max(...allBests) : null;
+    const personalBest = entries.length ? Math.max(...entries.map((e) => e.best)) : null;
 
     const windows = [30, 60, 90].map((days) => ({
       days,
@@ -198,7 +189,6 @@
     const canvas = document.getElementById("peak-flow-chart");
     const labels = entries.map((e) => `${e.date} ${e.time} ${e.period}`);
     const bestData = entries.map((e) => e.best);
-    const afterData = entries.map((e) => (e.afterRescueBest !== null ? e.afterRescueBest : null));
 
     const pointColors = entries.map((e) => {
       const z = zoneFor(e.best, zones);
@@ -206,10 +196,11 @@
       if (z === "yellow") return "#b8860b";
       return "#c62828";
     });
+    const pointStyles = entries.map((e) => (e.afterRescue ? "triangle" : "circle"));
+    const pointRadii = entries.map((e) => (e.afterRescue ? 7 : 4));
 
-    const allValues = bestData.concat(afterData.filter((v) => v !== null));
-    const yMax = Math.max(zones.green.max, ...allValues) + 20;
-    const yMin = Math.max(0, Math.min(zones.red.max, ...allValues) - 30);
+    const yMax = Math.max(zones.green.max, ...bestData) + 20;
+    const yMin = Math.max(0, Math.min(zones.red.max, ...bestData) - 30);
 
     if (chartInstance) {
       chartInstance.destroy();
@@ -227,18 +218,10 @@
             backgroundColor: "#2563eb",
             pointBackgroundColor: pointColors,
             pointBorderColor: pointColors,
-            pointRadius: 4,
+            pointStyle: pointStyles,
+            pointRadius: pointRadii,
             tension: 0.25,
             spanGaps: true,
-          },
-          {
-            label: "After rescue inhaler (L/min)",
-            data: afterData,
-            showLine: false,
-            pointStyle: "triangle",
-            pointRadius: 7,
-            pointBackgroundColor: "#ea580c",
-            pointBorderColor: "#ea580c",
           },
         ],
       },
@@ -308,7 +291,6 @@
 
     sorted.forEach((e) => {
       const zone = zoneFor(e.best, state.config.zones);
-      const improvement = rescueImprovementPct(e);
       const symptomList = ["cough", "wheeze", "nighttimeAwakening"]
         .filter((s) => e.symptoms && e.symptoms[s])
         .map((s) => (s === "nighttimeAwakening" ? "Night waking" : s[0].toUpperCase() + s.slice(1)))
@@ -321,11 +303,7 @@
         <td>${e.readings.join(" / ")}</td>
         <td><strong>${e.best}</strong></td>
         <td><span class="zone-pill ${zone}">${zone}</span></td>
-        <td>${
-          e.afterRescueBest !== null
-            ? `${e.afterRescueBest}${improvement ? ` <span class="rescue-badge">(+${improvement}%)</span>` : ""}`
-            : "—"
-        }</td>
+        <td>${e.afterRescue ? `<span class="rescue-badge">▲ Yes</span>` : "—"}</td>
         <td>${symptomList || "—"}</td>
         <td class="notes-cell">${e.symptoms && e.symptoms.notes ? e.symptoms.notes : "—"}</td>
       `;
