@@ -258,7 +258,16 @@
             title: { display: true, text: "L/min" },
           },
           x: {
-            ticks: { maxRotation: 60, minRotation: 45, autoSkip: true },
+            ticks: {
+              maxRotation: 0,
+              minRotation: 0,
+              autoSkip: true,
+              callback(value) {
+                const label = this.getLabelForValue(value); // "2026-06-18 07:10 AM"
+                const [y, m, d] = label.split(" ")[0].split("-");
+                return `${Number(m)}/${Number(d)}`;
+              },
+            },
           },
         },
         plugins: {
