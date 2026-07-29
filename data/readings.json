@@ -264,5 +264,24 @@
       "nighttimeAwakening": false,
       "notes": ""
     }
+  },
+  {
+    "id": "2026-07-29T10:18:00Z",
+    "date": "2026-07-29",
+    "time": "10:18",
+    "period": "AM",
+    "readings": [
+      220,
+      250,
+      250
+    ],
+    "best": 250,
+    "afterRescue": false,
+    "symptoms": {
+      "cough": false,
+      "wheeze": false,
+      "nighttimeAwakening": false,
+      "notes": ""
+    }
   }
 ]
