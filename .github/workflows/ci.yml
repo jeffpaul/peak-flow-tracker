@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Check JS syntax
+        run: node --check assets/app.js && node --check assets/log.js && node --check assets/theme.js && node --check tests/smoke.mjs && node --check tests/log-smoke.mjs
+
+      - name: Dashboard smoke test
+        run: node tests/smoke.mjs
+
+      - name: Log page smoke test
+        run: node tests/log-smoke.mjs
