@@ -5,6 +5,10 @@ on:
     paths:
       - "data/readings.json"
       - "data/config.json"
+  pull_request:
+    paths:
+      - "data/readings.json"
+      - "data/config.json"
 
 jobs:
   validate:
@@ -43,29 +47,72 @@ jobs:
             const READING_MIN = 60;
             const READING_MAX = 800;
 
+            function to24Hour(time, period) {
+              const match = time.match(/^(\d{1,2}):([0-5]\d)$/);
+              if (!match) return null;
+              let h = Number(match[1]);
+              const mm = match[2];
+              if (h < 1 || h > 23) return null;
+              if (h >= 13) return { hh: String(h).padStart(2, '0'), mm };
+              if (period === 'PM' && h !== 12) h += 12;
+              if (period === 'AM' && h === 12) h = 0;
+              return { hh: String(h).padStart(2, '0'), mm };
+            }
+
+            function isRealDate(s) {
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+              const y = Number(s.slice(0, 4));
+              const m = Number(s.slice(5, 7));
+              const d = Number(s.slice(8, 10));
+              const dt = new Date(Date.UTC(y, m - 1, d));
+              return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+            }
+
             readings.forEach((entry, i) => {
+              const where = `Entry ${i} (${entry.id || 'unknown'})`;
+
+              if (!Array.isArray(entry.readings) || entry.readings.length !== 3) {
+                fail(`${where} must have exactly 3 readings`);
+              } else if (entry.readings.some((n) => !Number.isInteger(n))) {
+                fail(`${where} readings must be whole numbers`);
+              } else if (entry.readings.some((n) => n < READING_MIN || n > READING_MAX)) {
+                fail(`${where} has a reading outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
+              }
+
+              if (typeof entry.best !== 'number' || !Number.isInteger(entry.best)) {
+                fail(`${where} "best" must be a whole number`);
+              } else if (entry.best < READING_MIN || entry.best > READING_MAX) {
+                fail(`${where} "best" (${entry.best}) is outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
+              } else if (Array.isArray(entry.readings) && entry.best !== Math.max(...entry.readings)) {
+                fail(`${where} "best" (${entry.best}) does not match the highest reading (${Math.max(...entry.readings)})`);
+              }
+
               for (const field of requiredStringFields) {
                 if (typeof entry[field] !== 'string' || entry[field].length === 0) {
-                  fail(`Entry ${i} (${entry.id || 'unknown'}) is missing string field "${field}"`);
+                  fail(`${where} is missing string field "${field}"`);
                 }
               }
-              if (!Array.isArray(entry.readings) || entry.readings.some((n) => typeof n !== 'number')) {
-                fail(`Entry ${i} (${entry.id || 'unknown'}) must have a "readings" array of numbers`);
-              } else if (entry.readings.some((n) => n < READING_MIN || n > READING_MAX)) {
-                fail(`Entry ${i} (${entry.id || 'unknown'}) has a reading outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
+              if (!isRealDate(entry.date)) {
+                fail(`${where} "date" (${entry.date}) must be a real date in YYYY-MM-DD format`);
               }
-              if (typeof entry.best !== 'number') {
-                fail(`Entry ${i} (${entry.id || 'unknown'}) is missing numeric field "best"`);
-              } else if (entry.best < READING_MIN || entry.best > READING_MAX) {
-                fail(`Entry ${i} (${entry.id || 'unknown'}) "best" (${entry.best}) is outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
+              if (entry.period !== 'AM' && entry.period !== 'PM') {
+                fail(`${where} "period" (${entry.period}) must be AM or PM`);
               }
+              const to24 = to24Hour(entry.time, entry.period);
+              if (!to24) {
+                fail(`${where} "time" (${entry.time}) must be HH:MM (12-hour with AM/PM, or 24-hour)`);
+              }
+              if (entry.id !== `${entry.date}T${to24 ? to24.hh : '??'}:${to24 ? to24.mm : '??'}:00Z`) {
+                fail(`${where} "id" (${entry.id}) must equal the date/time in UTC (${entry.date}T${to24 ? to24.hh : '??'}:${to24 ? to24.mm : '??'}:00Z)`);
+              }
+
               for (const field of requiredBoolFields) {
                 if (typeof entry[field] !== 'boolean') {
-                  fail(`Entry ${i} (${entry.id || 'unknown'}) is missing boolean field "${field}"`);
+                  fail(`${where} is missing boolean field "${field}"`);
                 }
               }
               if (!entry.symptoms || typeof entry.symptoms !== 'object') {
-                fail(`Entry ${i} (${entry.id || 'unknown'}) is missing "symptoms" object`);
+                fail(`${where} is missing "symptoms" object`);
               }
             });
 

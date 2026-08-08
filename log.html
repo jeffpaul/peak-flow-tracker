@@ -8,72 +8,135 @@
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="assets/style.css" />
+  <script src="assets/theme.js"></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
   <div class="wrap">
     <header class="site-header">
-      <h1>Log a Reading</h1>
-      <p>Fill this in, then review and submit on GitHub.</p>
+      <div class="topbar">
+        <a class="brand" href="index.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2v20M12 6c-3.5-3.5-7-2-7 1 0 4 7 5 7 9m0-10c3.5-3.5 7-2 7 1 0 4-7 5-7 9" />
+          </svg>
+          Peak Flow Tracker
+        </a>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Toggle color theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+          </svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4" />
+          </svg>
+        </button>
+      </div>
+      <div class="hero">
+        <h1>Log a Reading</h1>
+        <p class="hero-sub">Three blows, best of three is logged. Fill this in, then review and submit on GitHub.</p>
+      </div>
     </header>
 
-    <main>
-      <form id="log-form" class="card form-card">
-        <div class="field">
-          <label for="entryDateTime">Date &amp; Time</label>
-          <input type="datetime-local" id="entryDateTime" required />
-        </div>
+    <main id="main" tabindex="-1">
+      <section class="card form-card" aria-label="Log a reading form">
+        <ol class="steps" aria-label="Logging steps">
+          <li class="step is-active"><span>1</span> Enter readings</li>
+          <li class="step"><span>2</span> Review preview</li>
+          <li class="step"><span>3</span> Submit on GitHub</li>
+        </ol>
 
-        <div class="field-row">
+        <form id="log-form" class="form-card" novalidate>
+          <div class="field" id="field-datetime">
+            <label for="entryDateTime">Date &amp; Time</label>
+            <input type="datetime-local" id="entryDateTime" required />
+          </div>
+
+          <div class="field-row">
+            <div class="field" id="field-reading1">
+              <label for="reading1">Reading 1 (L/min)</label>
+              <input type="number" id="reading1" inputmode="numeric" placeholder="280" min="60" max="800" step="1" required />
+            </div>
+            <div class="field" id="field-reading2">
+              <label for="reading2">Reading 2 (L/min)</label>
+              <input type="number" id="reading2" inputmode="numeric" placeholder="275" min="60" max="800" step="1" required />
+            </div>
+            <div class="field" id="field-reading3">
+              <label for="reading3">Reading 3 (L/min)</label>
+              <input type="number" id="reading3" inputmode="numeric" placeholder="290" min="60" max="800" step="1" required />
+            </div>
+          </div>
+
           <div class="field">
-            <label for="reading1">Reading 1 (L/min)</label>
-            <input type="number" id="reading1" inputmode="numeric" placeholder="280" min="60" max="800" required />
+            <label class="checkbox-label"><input type="checkbox" id="afterRescue" /> Taken after using a rescue inhaler?</label>
           </div>
+
           <div class="field">
-            <label for="reading2">Reading 2 (L/min)</label>
-            <input type="number" id="reading2" inputmode="numeric" placeholder="275" min="60" max="800" required />
+            <label>Symptoms</label>
+            <div class="checkbox-row">
+              <label class="checkbox-label"><input type="checkbox" name="symptom" value="Cough" /> Cough</label>
+              <label class="checkbox-label"><input type="checkbox" name="symptom" value="Wheeze" /> Wheeze</label>
+              <label class="checkbox-label"><input type="checkbox" name="symptom" value="Nighttime awakening" /> Nighttime awakening</label>
+            </div>
           </div>
+
           <div class="field">
-            <label for="reading3">Reading 3 (L/min)</label>
-            <input type="number" id="reading3" inputmode="numeric" placeholder="290" min="60" max="800" required />
+            <label for="notes">Notes</label>
+            <textarea id="notes" rows="3" placeholder="Optional — activity, triggers, medication changes, etc."></textarea>
           </div>
-        </div>
 
-        <div class="field">
-          <label class="checkbox-label"><input type="checkbox" id="afterRescue" /> Taken after using a rescue inhaler?</label>
-        </div>
-
-        <div class="field">
-          <label>Symptoms</label>
-          <div class="checkbox-row">
-            <label class="checkbox-label"><input type="checkbox" name="symptom" value="Cough" /> Cough</label>
-            <label class="checkbox-label"><input type="checkbox" name="symptom" value="Wheeze" /> Wheeze</label>
-            <label class="checkbox-label"><input type="checkbox" name="symptom" value="Nighttime awakening" /> Nighttime awakening</label>
+          <div class="preview" id="preview" aria-label="Preview of this reading">
+            <p class="preview-title">Preview</p>
+            <dl class="preview-grid">
+              <div class="preview-item">
+                <dt>When</dt>
+                <dd id="preview-datetime">—</dd>
+              </div>
+              <div class="preview-item">
+                <dt>Readings</dt>
+                <dd id="preview-readings">—</dd>
+              </div>
+              <div class="preview-item">
+                <dt>Best</dt>
+                <dd id="preview-best">—</dd>
+              </div>
+              <div class="preview-item">
+                <dt>Zone</dt>
+                <dd><span id="preview-zone" class="zone-pill">—</span></dd>
+              </div>
+              <div class="preview-item">
+                <dt>After rescue</dt>
+                <dd id="preview-rescue">No</dd>
+              </div>
+              <div class="preview-item">
+                <dt>Symptoms</dt>
+                <dd id="preview-symptoms">None</dd>
+              </div>
+            </dl>
+            <p class="preview-note" id="preview-notes-line">Notes: none</p>
           </div>
-        </div>
 
-        <div class="field">
-          <label for="notes">Notes</label>
-          <textarea id="notes" rows="3" placeholder="Optional — activity, triggers, medication changes, etc."></textarea>
-        </div>
-
-        <button type="submit" class="submit-btn">Continue to GitHub</button>
-        <p class="form-note">This takes you to a pre-filled GitHub issue — you'll still need to tap <strong>Submit new issue</strong> there to log it.</p>
-      </form>
+          <button type="submit" class="submit-btn">Continue to GitHub</button>
+          <p class="form-note">This takes you to a pre-filled GitHub issue — you'll still need to tap <strong>Submit new issue</strong> there to log it.</p>
+        </form>
+      </section>
 
       <p class="back-link"><a href="index.html">&larr; Back to dashboard</a></p>
     </main>
 
     <footer class="site-footer">
       <p>Data lives in <code>data/readings.json</code>, entered via a GitHub Issue Form. This page never talks to GitHub except to hand off to its own new-issue page.</p>
-      <p>
+      <div class="foot-links">
         <a href="https://github.com/jeffpaul/peak-flow-tracker">GitHub Repo</a>
-        ·
+        <span aria-hidden="true">·</span>
         <a href="https://github.com/jeffpaul/peak-flow-tracker/blob/main/LICENSE">MIT License</a>
-        ·
-        Crafted by <a href="https://github.com/jeffpaul">@jeffpaul</a>
-      </p>
+        <span aria-hidden="true">·</span>
+        <a href="https://github.com/jeffpaul">@jeffpaul</a>
+      </div>
     </footer>
   </div>
+
+  <div id="live-region" class="sr-only" aria-live="polite"></div>
 
   <script src="assets/log.js"></script>
 </body>
