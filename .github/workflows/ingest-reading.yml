@@ -4,6 +4,10 @@ on:
   issues:
     types: [opened]
 
+concurrency:
+  group: ingest-reading
+  cancel-in-progress: false
+
 permissions:
   issues: write
   contents: write
@@ -84,40 +88,75 @@ jobs:
             }
 
             function to24Hour(time, period) {
-              const match = time.match(/^(\d{1,2}):(\d{2})/);
-              if (!match) return { hh: '00', mm: '00' };
+              const match = time.match(/^(\d{1,2}):([0-5]\d)$/);
+              if (!match) return null;
               let h = Number(match[1]);
-              const m = match[2];
+              const mm = match[2];
+              if (h < 1 || h > 23) return null;
+              if (h >= 13) return { hh: String(h).padStart(2, '0'), mm };
               if (period === 'PM' && h !== 12) h += 12;
               if (period === 'AM' && h === 12) h = 0;
-              return { hh: String(h).padStart(2, '0'), mm: m };
+              return { hh: String(h).padStart(2, '0'), mm };
             }
 
-            const date = extractField('Date');
-            const time = extractField('Time');
+            function isRealDate(s) {
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+              const y = Number(s.slice(0, 4));
+              const m = Number(s.slice(5, 7));
+              const d = Number(s.slice(8, 10));
+              const dt = new Date(Date.UTC(y, m - 1, d));
+              return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+            }
+
+            const date = extractField('Date').trim();
+            const time = extractField('Time').trim();
             const period = extractField('AM / PM').trim().toUpperCase();
             const reading1 = toNumber(extractField('Reading 1 (L/min)'));
             const reading2 = toNumber(extractField('Reading 2 (L/min)'));
             const reading3 = toNumber(extractField('Reading 3 (L/min)'));
-            const afterRescue = extractField('Were the readings above taken after using a rescue inhaler?').trim().toLowerCase() === 'yes';
+            const afterRescueRaw = extractField('Were the readings above taken after using a rescue inhaler?').trim().toLowerCase();
             const symptomsBlock = extractField('Symptoms');
             const notes = extractField('Notes');
 
             const READING_MIN = 60;
             const READING_MAX = 800;
-            const outOfRange = [
-              { label: 'Reading 1', value: reading1 },
-              { label: 'Reading 2', value: reading2 },
-              { label: 'Reading 3', value: reading3 },
-            ].filter((r) => r.value !== null && (r.value < READING_MIN || r.value > READING_MAX));
+            const readingsRaw = [reading1, reading2, reading3];
 
-            if (outOfRange.length > 0) {
-              const list = outOfRange.map((r) => `${r.label} (${r.value})`).join(', ');
+            const errors = [];
+
+            readingsRaw.forEach((r, i) => {
+              const label = `Reading ${i + 1}`;
+              if (r === null || !Number.isInteger(r)) {
+                errors.push(`${label} must be a whole number (got ${r === null ? 'nothing' : r})`);
+              } else if (r < READING_MIN || r > READING_MAX) {
+                errors.push(`${label} (${r}) is outside the plausible range (${READING_MIN}-${READING_MAX} L/min)`);
+              }
+            });
+
+            if (!isRealDate(date)) {
+              errors.push(`Date "${date}" must be a real date in YYYY-MM-DD format`);
+            }
+
+            if (period !== 'AM' && period !== 'PM') {
+              errors.push(`AM / PM must be AM or PM (got "${period}")`);
+            }
+
+            const to24 = to24Hour(time, period);
+            if (!to24) {
+              errors.push(`Time "${time}" must be HH:MM (12-hour with AM/PM, or 24-hour)`);
+            }
+
+            if (afterRescueRaw !== 'yes' && afterRescueRaw !== 'no') {
+              errors.push('After rescue answer must be Yes or No');
+            }
+
+            if (errors.length > 0) {
+              const body = `Couldn't log this reading:\n\n${errors.map((e) => `- ${e}`).join('\n')}\n\nPlease check the values and open a new issue with the corrected ones.`;
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: context.issue.number,
-                body: `${list} ${outOfRange.length > 1 ? 'are' : 'is'} outside the plausible range (${READING_MIN}-${READING_MAX} L/min). Please check for a typo and open a new issue with the corrected value.`,
+                body,
               });
               await github.rest.issues.update({
                 owner: context.repo.owner,
@@ -129,25 +168,9 @@ jobs:
               return;
             }
 
-            const readings = [reading1, reading2, reading3].filter((n) => n !== null);
-            const best = readings.length ? Math.max(...readings) : null;
-
-            if (best === null) {
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                body: "Couldn't read any valid readings from this issue. Please open a new one using the Log a reading template.",
-              });
-              await github.rest.issues.update({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: context.issue.number,
-                state: 'closed',
-              });
-              core.setOutput('appended', 'false');
-              return;
-            }
+            const readings = readingsRaw;
+            const best = Math.max(...readings);
+            const afterRescue = afterRescueRaw === 'yes';
 
             const configPath = path.join(process.env.GITHUB_WORKSPACE, 'data', 'config.json');
             const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
@@ -162,7 +185,7 @@ jobs:
 
             const zone = zoneFor(best);
 
-            const { hh, mm } = to24Hour(time, period);
+            const { hh, mm } = to24;
             const id = `${date}T${hh}:${mm}:00Z`;
 
             const entry = {
@@ -199,6 +222,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/readings.json
           git commit -m "Log reading: issue #${{ github.event.issue.number }}"
+          for attempt in 1 2 3; do
+            if git pull --rebase origin main; then
+              break
+            fi
+            sleep 2
+          done
           git push
 
       - name: Comment and close
