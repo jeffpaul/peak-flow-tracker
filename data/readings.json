@@ -435,5 +435,24 @@
       "nighttimeAwakening": false,
       "notes": ""
     }
+  },
+  {
+    "id": "2026-08-20T20:29:00Z",
+    "date": "2026-08-20",
+    "time": "08:29",
+    "period": "PM",
+    "readings": [
+      240,
+      270,
+      250
+    ],
+    "best": 270,
+    "afterRescue": false,
+    "symptoms": {
+      "cough": false,
+      "wheeze": false,
+      "nighttimeAwakening": false,
+      "notes": ""
+    }
   }
 ]
