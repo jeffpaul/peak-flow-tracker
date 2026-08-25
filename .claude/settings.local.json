@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh --version)",
+      "Bash(git --version)",
+      "Bash(git init *)",
+      "Bash(node -e ' *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4173/index.html)",
+      "Bash(node /private/tmp/claude-501/-Users-jeffpaul-GitHub-jeffpaul-peak-flow-tracker/4825bfab-b4bd-4cb0-86ca-cd30da75f086/scratchpad/test-ingest-logic.js)",
+      "Bash(npx --yes js-yaml --help)",
+      "Bash(brew list *)",
+      "Bash(git add *)",
+      "Bash(ssh-keyscan -t rsa,ecdsa,ed25519 github.com)",
+      "Bash(tee -a ~/.ssh/known_hosts)",
+      "Bash(npx --yes js-yaml .github/workflows/ingest-reading.yml)",
+      "Bash(npx --yes js-yaml /Users/jeffpaul/GitHub/jeffpaul/peak-flow-tracker/.github/workflows/ingest-reading.yml)",
+      "Bash(npx --yes js-yaml /Users/jeffpaul/GitHub/jeffpaul/peak-flow-tracker/.github/workflows/validate-data.yml)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)",
+      "Bash(node -c assets/log.js)",
+      "Bash(npx --yes js-yaml /Users/jeffpaul/GitHub/jeffpaul/peak-flow-tracker/.github/ISSUE_TEMPLATE/reading.yml)",
+      "Bash(gh run *)",
+      "Bash(gh issue *)",
+      "Bash(gh api *)",
+      "mcp__f7fb4a41-9ff2-4ede-9cc4-4527a7035a82__slack_search_users",
+      "mcp__f7fb4a41-9ff2-4ede-9cc4-4527a7035a82__slack_search_channels",
+      "mcp__f7fb4a41-9ff2-4ede-9cc4-4527a7035a82__slack_search_public",
+      "mcp__f7fb4a41-9ff2-4ede-9cc4-4527a7035a82__slack_list_channel_members",
+      "mcp__f7fb4a41-9ff2-4ede-9cc4-4527a7035a82__slack_search_public_and_private",
+      "Bash(ls -la \"/Users/jeffpaul/Library/CloudStorage/Dropbox/Downloads/\" 2>&1 | grep -i oss)",
+      "Bash(git log *)"
+    ]
+  }
+}
